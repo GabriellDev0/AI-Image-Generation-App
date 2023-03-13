@@ -8,37 +8,61 @@ const RenderCards = ({ data, title }) => {
   }
   return (
     <h2 className='mt-5 font-bold text-[#6449ff] text-xl uppercase'>{title}</h2>
-  )
+  );
 };
 
 const Home = () => {
-  const [loading, setloading] = useState(false);
-  const [allPosts, setallPosts] = useState(null);
-  const [searchText, setsearchText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [allPosts, setAllPosts] = useState(null);
 
-  useEffect(() =>{
+  const [searchText, setSearchText] = useState('');
+  const [searchedResults, setSearchedResults] = useState(null);
+  const [searchTimeout, setSearchTimeout] = useState(null);
+
+  useEffect(() => {
     const fetchPosts = async () => {
-      setloading(true)
-        try {
-          const response = await fetch('http://localhost:8080/api/v1/post',{
-            method: 'GET',
-            headers:{
-              'Content-Type': 'application/json',
-            }
-          })
-          if(response.ok){
-            const result = await response.json();
-            setallPosts(result.data.reverse());
-          }
-        } catch (error) {
-        alert(error)
-        }finally{
-          setloading(false)
+      setLoading(true);
+      try {
+        const response = await fetch('http://localhost:8080/api/v1/post', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          setAllPosts(result.data.reverse());
         }
-    }
+      } catch (error) {
+        alert(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    fetchPosts()
-  }, [])
+    fetchPosts();
+  }, []);
+
+  const handleSearchChange = (e) => {
+    clearTimeout(searchTimeout);
+
+    setSearchText(e.target.value);
+
+    setSearchTimeout(
+      setTimeout(() => {
+        const searchResults = allPosts.filter(
+          (item) =>
+            item.name
+              .toLowerCase()
+              .includes(
+                searchText.toLowerCase()
+              ) ||
+            item.prompt.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setSearchedResults(searchResults);
+      }, 500)
+    );
+  };
 
   return (
     <section className='max-w-7xl mx-auto'>
@@ -53,7 +77,14 @@ const Home = () => {
       </div>
 
       <div className='mt-16'>
-        <FormField />
+        <FormField
+          LabelName='Seach posts'
+          type='text'
+          name='text'
+          placeholder='Search posts'
+          value={searchText}
+          handleChange={handleSearchChange}
+        />
       </div>
 
       <div className='mt-10'>
@@ -66,21 +97,18 @@ const Home = () => {
             {searchText && (
               <h2 className='font-medium text-[#666e75] text-xl mb-3'>
                 Showing results for
-                <span className='text[#222328]'>{searchText}</span>
+                <span className='text[#222328]'> {searchText}</span>
               </h2>
             )}
 
             <div className='grid lg:grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 grid-cols-1 gap-3'>
               {searchText ? (
                 <RenderCards
-                  data={[]}
-                  title="No search results found"
+                  data={searchedResults}
+                  title='No search results found'
                 />
               ) : (
-                <RenderCards
-                  data={allPosts}
-                  title="No posts found"
-                />
+                <RenderCards data={allPosts} title='No posts found' />
               )}
             </div>
           </>
