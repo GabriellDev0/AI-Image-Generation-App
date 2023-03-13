@@ -16,7 +16,7 @@ const CreatePost = () => {
   const [loading, setLoading] = useState(false);
 
   const generateImage = async () => {
-    const link = 'http://localhost:8080/api/v1/dalle'
+    const link = 'https://dall-e-jolt.onrender.com/api/v1/dalle'
     if(form.prompt){
         try {
           setgeneratingImg(true)
@@ -47,7 +47,7 @@ const CreatePost = () => {
       if(form.prompt && form.photo){
         setLoading(true)
           try {
-            const link = 'http://localhost:8080/api/v1/post'
+            const link = 'https://dall-e-jolt.onrender.com/api/v1/post'
             const response = await fetch(link, {
               method: 'POST',
               headers: {
